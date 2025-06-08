@@ -1,0 +1,27 @@
+version: "3"
+services:
+  tensorflow-serving:
+    image: emacski/tensorflow-serving:latest-linux_arm
+    platform: linux/arm64
+    ports:
+      - "8501:8501"
+    volumes:
+      - ./modelo_completo_tf:/models/modelo_completo_tf
+    environment:
+      - MODEL_NAME=modelo_completo_tf
+    networks:
+      - ml-net
+
+  web:
+    build: .
+    ports:
+      - "8000:8000"
+    networks:
+      - ml-net
+    depends_on:
+      - tensorflow-serving
+    volumes:
+      - .:/app
+
+networks:
+  ml-net:
