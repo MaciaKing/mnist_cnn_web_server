@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="es">
+    <head>
+        <meta charset="UTF-8" />
+        <title>Dibujo de dígitos</title>
+        <style>
+            body {
+                text-align: center;
+                font-family: sans-serif;
+                background: #111;
+                color: white;
+            }
+            canvas {
+                border: 1px solid white;
+                cursor: crosshair;
+                background: black;
+            }
+            button {
+                margin-top: 10px;
+                padding: 10px 20px;
+                font-size: 16px;
+            }
+        </style>
+    </head>
+    <body>
+        <h2>Dibuja un dígito (fondo negro, línea blanca)</h2>
+        <canvas id="paintCanvas" width="280" height="280"></canvas><br />
+        <button onclick="clearCanvas()">Limpiar</button>
+        <button onclick="downloadImage()">Exportar como JPG</button>
+
+        <script>
+            const canvas = document.getElementById("paintCanvas");
+            const ctx = canvas.getContext("2d");
+
+            // Fondo negro al inicio
+            ctx.fillStyle = "black";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            let drawing = false;
+
+            canvas.addEventListener("mousedown", () => (drawing = true));
+            canvas.addEventListener("mouseup", () => {
+                drawing = false;
+                ctx.beginPath();
+            });
+            canvas.addEventListener("mouseout", () => (drawing = false));
+            canvas.addEventListener("mousemove", draw);
+
+            function draw(e) {
+                if (!drawing) return;
+                const rect = canvas.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+
+                ctx.lineWidth = 15; // Línea más gruesa
+                ctx.lineCap = "round"; // Bordes suaves
+                ctx.strokeStyle = "white"; // Pincel blanco
+
+                ctx.lineTo(x, y);
+                ctx.stroke();
+                ctx.beginPath();
+                ctx.moveTo(x, y);
+            }
+
+            function downloadImage() {
+                // Crear canvas temporal para fondo negro correcto
+                const tempCanvas = document.createElement("canvas");
+                tempCanvas.width = canvas.width;
+                tempCanvas.height = canvas.height;
+                const tempCtx = tempCanvas.getContext("2d");
+
+                // Fondo negro
+                tempCtx.fillStyle = "black";
+                tempCtx.fillRect(0, 0, tempCanvas.width, tempCanvas.height);
+
+                // Copiar contenido
+                tempCtx.drawImage(canvas, 0, 0);
+
+                // Exportar como imagen
+                const link = document.createElement("a");
+                link.download = "digito.jpg";
+                link.href = tempCanvas.toDataURL("image/jpeg", 1.0);
+                link.click();
+            }
+
+            function sendImage(image) {
+                fetch("/predecir", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({ image: image }),
+                })
+                    .then((res) => res.json())
+                    .then((data) => {
+                        alert("Número predicho: " + data.prediccion);
+                    });
+            }
+
+            function clearCanvas() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height); // Borra todo
+                ctx.fillStyle = "black"; // Fondo negro
+                ctx.fillRect(0, 0, canvas.width, canvas.height); // Rellena de nuevo
+                ctx.beginPath(); // Resetea el camino de dibujo
+            }
+        </script>
+    </body>
+</html>

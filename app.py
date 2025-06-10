@@ -1,11 +1,18 @@
-from flask import Flask
+from flask import Flask, request, jsonify, render_template
+import pdb
 
 def create_app():
     app = Flask(__name__)
 
     @app.route('/')
     def home():
-        return 'Hola, M!'
+        return render_template('paint.html')
+
+    @app.route('/predict_image')
+    def predict_image():
+        # # if request.
+        # pdb.set_trace()
+        return '1'
 
     return app
 
