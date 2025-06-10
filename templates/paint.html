@@ -76,15 +76,14 @@
                 // Copiar contenido
                 tempCtx.drawImage(canvas, 0, 0);
 
-                // Exportar como imagen
-                const link = document.createElement("a");
-                link.download = "digito.jpg";
-                link.href = tempCanvas.toDataURL("image/jpeg", 1.0);
-                link.click();
+                const imageData = tempCanvas.toDataURL("image/png"); // usa PNG (sin pérdida)
+
+                // Enviar al backend Flask
+                sendImage(imageData);
             }
 
             function sendImage(image) {
-                fetch("/predecir", {
+                fetch("/predict_image", {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json",
